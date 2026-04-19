@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duarah Store - Check Result</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background: radial-gradient(circle, #111, #000);
+  color: white;
+  text-align:center;
+}
+
+header {
+  padding:15px;
+  background: linear-gradient(90deg,#ffcc00,#ff6600);
+  color:black;
+  font-weight:bold;
+}
+
+.logo {
+  width:70px;
+}
+
+h1 {
+  margin:10px;
+}
+
+.box {
+  margin:30px auto;
+  padding:20px;
+  border:2px solid #00ff00;
+  border-radius:10px;
+  width:90%;
+  max-width:400px;
+}
+
+input {
+  padding:12px;
+  font-size:18px;
+  width:80%;
+  border:none;
+  border-radius:5px;
+  text-align:center;
+}
+
+button {
+  margin-top:15px;
+  padding:12px 25px;
+  font-size:18px;
+  background:#00cc44;
+  border:none;
+  color:white;
+  border-radius:5px;
+}
+
+#slot {
+  font-size:40px;
+  margin:20px;
+  letter-spacing:5px;
+}
+
+.result {
+  font-size:22px;
+  margin-top:20px;
+}
+
+/* blink */
+.blink {
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  50% { opacity: 0.3; }
+}
+
+/* confetti */
+.confetti {
+  position:fixed;
+  width:10px;
+  height:10px;
+  background:red;
+  top:0;
+  animation: fall 3s linear infinite;
+}
+
+@keyframes fall {
+  to { transform: translateY(100vh) rotate(360deg); }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<img src="YOUR_LOGO_LINK" class="logo">
+<h1>🎉 DUARAH STORE 🎉</h1>
+Check Lucky Draw Result
+</header>
+
+<div class="box">
+
+<div id="slot">----</div>
+
+<input type="text" id="serial" placeholder="Enter Serial No">
+<br>
+
+<button onclick="startCheck()">Check Result</button>
+
+<div id="result" class="result"></div>
+
+</div>
+
+<script>
+
+const dataURL = https://docs.google.com/spreadsheets/d/e/2PACX-1vTY3BBTVNhAg_42ZMxCF8ngaQ0KH-2xhfr0Ydr8bW-BPKdDKKqlhx8EP2tOjb6lD0EDfYdq0bOmDz-B/pubhtml?gid=60785841&single=true;
+
+function randomSerial() {
+  return "DS" + Math.floor(1000 + Math.random()*9000);
+}
+
+// SLOT ANIMATION
+function spinSlot(callback) {
+
+  let slot = document.getElementById("slot");
+  let count = 0;
+
+  let interval = setInterval(() => {
+    slot.innerHTML = randomSerial();
+    count++;
+
+    if (count > 20) {
+      clearInterval(interval);
+      callback();
+    }
+
+  }, 50);
+}
+
+
+// MAIN FUNCTION
+async function startCheck() {
+
+  let serial = document.getElementById("serial").value.trim();
+  let resultDiv = document.getElementById("result");
+
+  if (!serial) {
+    resultDiv.innerHTML = "⚠ Enter serial number";
+    return;
+  }
+
+  resultDiv.innerHTML = "Spinning...";
+  resultDiv.classList.add("blink");
+
+  spinSlot(async () => {
+
+    let response = await fetch(dataURL);
+    let data = await response.json();
+
+    let found = data.find(row => row.Serial == serial);
+
+    document.getElementById("slot").innerHTML = serial;
+    resultDiv.classList.remove("blink");
+
+    if (found) {
+
+      resultDiv.innerHTML =
+        "🎉 YOU WON! 🎉<br>" +
+        found.Position;
+
+      launchConfetti();
+
+    } else {
+
+      resultDiv.innerHTML =
+        "❌ Not a winner<br>Try again next time!";
+    }
+
+  });
+
+}
+
+
+// CONFETTI EFFECT
+function launchConfetti() {
+
+  for (let i=0; i<30; i++) {
+
+    let div = document.createElement("div");
+    div.className = "confetti";
+    div.style.left = Math.random()*100 + "vw";
+    div.style.background = "hsl(" + Math.random()*360 + ",100%,50%)";
+    div.style.animationDuration = (2+Math.random()*2) + "s";
+
+    document.body.appendChild(div);
+
+    setTimeout(()=>div.remove(),3000);
+  }
+}
+
+</script>
+
+</body>
+</html>
