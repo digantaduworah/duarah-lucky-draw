@@ -117,7 +117,7 @@ Check Lucky Draw Result
 const dataURL = "https://opensheet.elk.sh/2PACX-1vTY3BBTVNhAg_42ZMxCF8ngaQ0KH-2xhfr0Ydr8bW-BPKdDKKqlhx8EP2tOjb6lD0EDfYdq0bOmDz-B/History";
 
 function randomSerial() {
-  return "DS" + Math.floor(1000 + Math.random()*9000);
+  return Math.floor(1 + Math.random()*500); // matches your real data
 }
 
 // SLOT ANIMATION
@@ -154,33 +154,33 @@ async function startCheck() {
   resultDiv.innerHTML = "Spinning...";
   resultDiv.classList.add("blink");
 
-  spinSlot(async () => {
+spinSlot(async () => {
 
-    let response = await fetch(dataURL);
-    let data = await response.json();
+  let response = await fetch(dataURL);
+  let data = await response.json();
 
-   let found = data.find(row => {
-  if (!row.Serial) return false;
+  let input = document.getElementById("serial").value;
+  let cleanInput = input.replace(/\D/g, ""); // keep only numbers
 
-  let sheetSerial = row.Serial.toString().replace(/\D/g, ""); // only numbers
-  let userSerial = serial.toString().replace(/\D/g, "");
+  let found = data.find(row => {
+    if (!row.Serial) return false;
 
-  return sheetSerial === userSerial;
-});
-
-    document.getElementById("slot").innerHTML = serial;
-    resultDiv.classList.remove("blink");
-
-    if (found) {
-      resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position;
-      launchConfetti();
-    } else {
-      resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
-    }
-
+    let sheetSerial = row.Serial.toString().replace(/\D/g, "");
+    return sheetSerial === cleanInput;
   });
-}
 
+  document.getElementById("slot").innerHTML = cleanInput;
+  resultDiv.classList.remove("blink");
+
+  if (found) {
+    resultDiv.innerHTML = "🏆 CONGRATULATIONS! 🏆<br>You are "  + found.Position;
+    launchConfetti();
+  } else {
+    resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+  }
+
+});
+}
 
 // CONFETTI EFFECT
 function launchConfetti() {
