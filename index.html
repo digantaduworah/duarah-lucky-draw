@@ -163,8 +163,13 @@ spinSlot(async () => {
 
     console.log("DATA:", data); // debug
 
-    let input = document.getElementById("serial").value;
-    let cleanInput = input.replace(/\D/g, "");
+let cleanInput = document.getElementById("serial").value.trim().replace(/\D/g, "");
+
+if (!cleanInput) {
+  resultDiv.innerHTML = "⚠ Invalid serial";
+  resultDiv.classList.remove("blink");
+  return;
+}
 
     console.log("INPUT:", cleanInput);
 
@@ -172,7 +177,7 @@ spinSlot(async () => {
       if (!row.Serial) return false;
 
       let sheetSerial = row.Serial.toString().replace(/\D/g, "");
-      return sheetSerial === cleanInput;
+     return Number(sheetSerial) === Number(cleanInput);
     });
 
     console.log("FOUND:", found);
