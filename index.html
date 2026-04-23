@@ -114,7 +114,7 @@ Check Lucky Draw Result
 
 <script>
 
-const dataURL = https://docs.google.com/spreadsheets/d/e/2PACX-1vTY3BBTVNhAg_42ZMxCF8ngaQ0KH-2xhfr0Ydr8bW-BPKdDKKqlhx8EP2tOjb6lD0EDfYdq0bOmDz-B/pubhtml?gid=60785841&single=true;
+const dataURL = "https://opensheet.elk.sh/2PACX-1vTY3BBTVNhAg_42ZMxCF8ngaQ0KH-2xhfr0Ydr8bW-BPKdDKKqlhx8EP2tOjb6lD0EDfYdq0bOmDz-B/History";
 
 function randomSerial() {
   return "DS" + Math.floor(1000 + Math.random()*9000);
@@ -140,9 +140,10 @@ function spinSlot(callback) {
 
 
 // MAIN FUNCTION
+
 async function startCheck() {
 
-  let serial = document.getElementById("serial").value.trim();
+  let serial = document.getElementById("serial").value.trim().toUpperCase();
   let resultDiv = document.getElementById("result");
 
   if (!serial) {
@@ -158,27 +159,21 @@ async function startCheck() {
     let response = await fetch(dataURL);
     let data = await response.json();
 
-    let found = data.find(row => row.Serial == serial);
+    let found = data.find(row => 
+      row.Serial && row.Serial.toString().trim().toUpperCase() === serial
+    );
 
     document.getElementById("slot").innerHTML = serial;
     resultDiv.classList.remove("blink");
 
     if (found) {
-
-      resultDiv.innerHTML =
-        "🎉 YOU WON! 🎉<br>" +
-        found.Position;
-
+      resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position;
       launchConfetti();
-
     } else {
-
-      resultDiv.innerHTML =
-        "❌ Not a winner<br>Try again next time!";
+      resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
     }
 
   });
-
 }
 
 
