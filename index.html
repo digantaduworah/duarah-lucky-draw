@@ -156,27 +156,40 @@ async function startCheck() {
 
 spinSlot(async () => {
 
-  let response = await fetch(dataURL);
-  let data = await response.json();
+  try {
 
-  let input = document.getElementById("serial").value;
-  let cleanInput = input.replace(/\D/g, ""); // keep only numbers
+    let response = await fetch(dataURL);
 
-  let found = data.find(row => {
-    if (!row.Serial) return false;
+    if (!response.ok) throw new Error("Network error");
 
-    let sheetSerial = row.Serial.toString().replace(/\D/g, "");
-    return sheetSerial === cleanInput;
-  });
+    let data = await response.json();
 
-  document.getElementById("slot").innerHTML = cleanInput;
-  resultDiv.classList.remove("blink");
+    let input = document.getElementById("serial").value;
+    let cleanInput = input.replace(/\D/g, "");
 
-  if (found) {
-    resultDiv.innerHTML = "🏆 CONGRATULATIONS! 🏆<br>You are "  + found.Position;
-    launchConfetti();
-  } else {
-    resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+    let found = data.find(row => {
+      if (!row.Serial) return false;
+
+      let sheetSerial = row.Serial.toString().replace(/\D/g, "");
+      return sheetSerial === cleanInput;
+    });
+
+    document.getElementById("slot").innerHTML = cleanInput;
+    resultDiv.classList.remove("blink");
+
+    if (found) {
+      resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position;
+      launchConfetti();
+    } else {
+      resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+    }
+
+  } catch (err) {
+
+    resultDiv.classList.remove("blink");
+    resultDiv.innerHTML = "⚠ Error loading result. Try again.";
+
+    console.error(err);
   }
 
 });
