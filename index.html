@@ -159,9 +159,14 @@ async function startCheck() {
     let response = await fetch(dataURL);
     let data = await response.json();
 
-    let found = data.find(row => 
-      row.Serial && row.Serial.toString().trim().toUpperCase() === serial
-    );
+   let found = data.find(row => {
+  if (!row.Serial) return false;
+
+  let sheetSerial = row.Serial.toString().replace(/\D/g, ""); // only numbers
+  let userSerial = serial.toString().replace(/\D/g, "");
+
+  return sheetSerial === userSerial;
+});
 
     document.getElementById("slot").innerHTML = serial;
     resultDiv.classList.remove("blink");
