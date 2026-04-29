@@ -1,143 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Duarah Store - Check Result</title>
-  
-<style>
-body {
-  margin:0;
-  font-family: Arial;
-  background: radial-gradient(circle, #111, #000);
-  color: white;
-  text-align:center;
-}
-
-header {
-  padding:15px;
-  background: linear-gradient(90deg,#ffcc00,#ff6600);
-  color:black;
-  font-weight:bold;
-}
-
-  .logo {
-  width: 70px;
-  border-radius: 50%;
-  background: white;
-  padding: 5px;
-}
-
-h1 {
-  margin:10px;
-}
-
-.box {
-  margin:30px auto;
-  padding:20px;
-  border:2px solid #00ff00;
-  border-radius:10px;
-  width:90%;
-  max-width:400px;
-}
-
-input {
-  padding:12px;
-  font-size:18px;
-  width:80%;
-  border:none;
-  border-radius:5px;
-  text-align:center;
-}
-
-button {
-  margin-top:15px;
-  padding:12px 25px;
-  font-size:18px;
-  background:#00cc44;
-  border:none;
-  color:white;
-  border-radius:5px;
-}
-
-#slot {
-  font-size:40px;
-  margin:20px;
-  letter-spacing:5px;
-}
-
-.result {
-  font-size:22px;
-  margin-top:20px;
-}
-
-/* blink */
-.blink {
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  50% { opacity: 0.3; }
-}
-
-/* confetti */
-.confetti {
-  position:fixed;
-  width:10px;
-  height:10px;
-  background:red;
-  top:0;
-  animation: fall 3s linear infinite;
-}
-
-@keyframes fall {
-  to { transform: translateY(100vh) rotate(360deg); }
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<img src="logo.png" class="logo">
-<h1>🎉 DUARAH STORE 🎉</h1>
-Check Lucky Draw Result
-</header>
-
-<div class="box">
-
-<div id="slot">----</div>
-
-<input type="text" id="serial" placeholder="Enter Serial No">
-<br>
-<input type="text" id="phone" placeholder="Enter Last 5 Digits">
-
-<br><br>
-<button onclick="startCheck()">Check Result</button>
-
-<div id="result" class="result"></div>
-<div id="whatsappBox" style="display:none; margin-top:15px;">
-  <a id="waLink" target="_blank">
-    <button style="background:#25D366;">📲 Claim Prize on WhatsApp</button>
-  </a>
-</div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script>
-  const firebaseConfig = {
-  apiKey: "AIzaSyC4Vogg-VmLwhi2WZUeuFdQr8ImrZM0FpM",
-  authDomain: "duarah-store-e5956.firebaseapp.com",
-  projectId: "duarah-store-e5956",
-  storageBucket: "duarah-store-e5956.firebasestorage.app",
-  messagingSenderId: "493444927039",
-  appId: "1:493444927039:web:7d96601c8286688587f28a",
-  measurementId: "G-X702E501FK"
-};
 
-firebase.initializeApp(firebaseConfig);
 const dataURL = "https://opensheet.elk.sh/1BoY54pcG9Xao8wgnZtaE5HKXyr0QgOxQwsYvmTlYme0/History";
-  
+
 function randomSerial() {
-  return Math.floor(1 + Math.random()*500); // matches your real data
+  return Math.floor(1 + Math.random()*500);
 }
 
 // SLOT ANIMATION
@@ -179,7 +45,7 @@ async function startCheck() {
 
     try {
 
-      let response = await fetch(dataURL);
+      let response = await fetch(dataURL, { cache: "no-store" });
       let data = await response.json();
 
       let cleanInput = serial.replace(/\D/g, "");
@@ -238,7 +104,7 @@ async function startCheck() {
 }
 
 
-// CONFETTI EFFECT
+// CONFETTI
 function launchConfetti() {
 
   for (let i=0; i<30; i++) {
@@ -254,9 +120,5 @@ function launchConfetti() {
     setTimeout(()=>div.remove(),3000);
   }
 }
-let confirmationResult;
 
 </script>
-
-</body>
-</html>
