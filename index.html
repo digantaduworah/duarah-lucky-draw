@@ -111,9 +111,6 @@ Check Lucky Draw Result
 <input type="text" id="phone" placeholder="Enter Last 5 Digits">
 
 <br><br>
-
-<input type="text" id="otp" placeholder="Enter OTP">
-<button onclick="verifyOTP()">Verify OTP</button>
 <button onclick="startCheck()">Check Result</button>
 
 <div id="result" class="result"></div>
@@ -167,10 +164,6 @@ function spinSlot(callback) {
 async function startCheck() {
 
   let resultDiv = document.getElementById("result");
-
-  if (!window.userVerified) {
-    resultDiv.innerHTML = "⚠ Verify OTP first";
-    return;
   }
 
   let serial = document.getElementById("serial").value.trim();
