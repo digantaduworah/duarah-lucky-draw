@@ -3,7 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Duarah Store - Check Result</title>
-
+  
 <style>
 body {
   margin:0;
@@ -108,7 +108,17 @@ Check Lucky Draw Result
 
 <input type="text" id="serial" placeholder="Enter Serial No">
 <br>
+<input type="text" id="phone" placeholder="Enter Phone Number">
+<br><br>
 
+<div id="recaptcha-container"></div>
+
+<button onclick="sendOTP()">Send OTP</button>
+
+<br><br>
+
+<input type="text" id="otp" placeholder="Enter OTP">
+<button onclick="verifyOTP()">Verify OTP</button>
 <button onclick="startCheck()">Check Result</button>
 
 <div id="result" class="result"></div>
@@ -117,7 +127,17 @@ Check Lucky Draw Result
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyC4Vogg-VmLwhi2WZUeuFdQr8ImrZM0FpM",
+  authDomain: "duarah-store-e5956.firebaseapp.com",
+  projectId: "duarah-store-e5956",
+  storageBucket: "duarah-store-e5956.firebasestorage.app",
+  messagingSenderId: "493444927039",
+  appId: "1:493444927039:web:7d96601c8286688587f28a",
+  measurementId: "G-X702E501FK"
+};
 
+firebase.initializeApp(firebaseConfig);
 const dataURL = "https://opensheet.elk.sh/1BoY54pcG9Xao8wgnZtaE5HKXyr0QgOxQwsYvmTlYme0/History";
   
 function randomSerial() {
@@ -147,8 +167,14 @@ function spinSlot(callback) {
 
 async function startCheck() {
 
-  let serial = document.getElementById("serial").value.trim().toUpperCase();
   let resultDiv = document.getElementById("result");
+
+  if (!window.userVerified) {
+    resultDiv.innerHTML = "⚠ Verify OTP first";
+    return;
+  }
+
+  let serial = document.getElementById("serial").value.trim();
 
   if (!serial) {
     resultDiv.innerHTML = "⚠ Enter serial number";
@@ -158,51 +184,52 @@ async function startCheck() {
   resultDiv.innerHTML = "Spinning...";
   resultDiv.classList.add("blink");
 
-spinSlot(async () => {
+  spinSlot(async () => {
 
-  try {
+    try {
 
-    let response = await fetch(dataURL);
-    let data = await response.json();
+      let response = await fetch(dataURL);
+      let data = await response.json();
 
-    console.log("DATA:", data); // debug
+      let cleanInput = serial.replace(/\D/g, "");
 
-let cleanInput = document.getElementById("serial").value.trim().replace(/\D/g, "");
+      if (!cleanInput) {
+        resultDiv.innerHTML = "⚠ Invalid serial";
+        resultDiv.classList.remove("blink");
+        return;
+      }
 
-if (!cleanInput) {
-  resultDiv.innerHTML = "⚠ Invalid serial";
-  resultDiv.classList.remove("blink");
-  return;
-}
+      let phoneInput = document.getElementById("phone").value;
 
-    console.log("INPUT:", cleanInput);
+      let found = data.find(row => {
+        if (!row.Serial || !row.Phone) return false;
 
-    let found = data.find(row => {
-      if (!row.Serial) return false;
+        let sheetSerial = row.Serial.toString().replace(/\D/g, "");
+        let sheetPhone = row.Phone.toString().replace(/\D/g, "");
 
-      let sheetSerial = row.Serial.toString().replace(/\D/g, "");
-     return Number(sheetSerial) === Number(cleanInput);
-    });
+        return (
+          Number(sheetSerial) === Number(cleanInput) &&
+          sheetPhone === phoneInput
+        );
+      });
 
-    console.log("FOUND:", found);
+      document.getElementById("slot").innerHTML = cleanInput;
+      resultDiv.classList.remove("blink");
 
-    document.getElementById("slot").innerHTML = cleanInput;
-    resultDiv.classList.remove("blink");
+      if (found) {
+        resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position;
+        launchConfetti();
+      } else {
+        resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+      }
 
-    if (found) {
-      resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position;
-      launchConfetti();
-    } else {
-      resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+    } catch (error) {
+      console.error("ERROR:", error);
+      resultDiv.classList.remove("blink");
+      resultDiv.innerHTML = "⚠ Error loading result";
     }
 
-  } catch (error) {
-    console.error("ERROR:", error);
-    resultDiv.classList.remove("blink");
-    resultDiv.innerHTML = "⚠ Error loading result";
-  }
-
-});
+  });
 }
 
 // CONFETTI EFFECT
@@ -221,7 +248,38 @@ function launchConfetti() {
     setTimeout(()=>div.remove(),3000);
   }
 }
+let confirmationResult;
 
+function sendOTP() {
+
+  let phone = "+91" + document.getElementById("phone").value;
+
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+  }
+
+  firebase.auth().signInWithPhoneNumber(phone, window.recaptchaVerifier)
+    .then(result => {
+      confirmationResult = result;
+      alert("OTP Sent");
+    })
+    .catch(error => {
+      alert(error.message);
+    });
+}
+function verifyOTP() {
+
+  let code = document.getElementById("otp").value;
+
+  confirmationResult.confirm(code)
+    .then(result => {
+      alert("Verified ✅");
+      window.userVerified = true;
+    })
+    .catch(error => {
+      alert("Invalid OTP");
+    });
+}
 </script>
 
 </body>
