@@ -134,7 +134,7 @@ async function startCheck() {
     try {
       let response = await fetch(dataURL, { cache: "no-store" });
       let data = await response.json();
-
+console.log("FULL DATA:", data);
       console.log("DATA:", data);
       console.log("INPUT SERIAL:", cleanInput);
       console.log("INPUT LAST5:", userLast5);
