@@ -108,7 +108,7 @@ Check Lucky Draw Result
 
 <input type="text" id="serial" placeholder="Enter Serial No">
 <br>
-<input type="text" id="phone" placeholder="Enter Phone Number">
+<input type="text" id="phone" placeholder="Enter Last 5 Digits">
 <br><br>
 
 <div id="recaptcha-container"></div>
@@ -122,7 +122,11 @@ Check Lucky Draw Result
 <button onclick="startCheck()">Check Result</button>
 
 <div id="result" class="result"></div>
-
+<div id="whatsappBox" style="display:none; margin-top:15px;">
+  <a id="waLink" target="_blank">
+    <button style="background:#25D366;">📲 Claim Prize on WhatsApp</button>
+  </a>
+</div>
 </div>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -199,29 +203,53 @@ async function startCheck() {
         return;
       }
 
-      let phoneInput = document.getElementById("phone").value;
+let userLast5 = document.getElementById("phone").value.replace(/\D/g, "");
 
-      let found = data.find(row => {
-        if (!row.Serial || !row.Phone) return false;
+if (userLast5.length !== 5) {
+  resultDiv.innerHTML = "⚠ Enter valid last 5 digits";
+  resultDiv.classList.remove("blink");
+  return;
+}
 
-        let sheetSerial = row.Serial.toString().replace(/\D/g, "");
-        let sheetPhone = row.Phone.toString().replace(/\D/g, "");
+let found = data.find(row => {
+  if (!row.Serial || !row.Phone) return false;
 
-        return (
-          Number(sheetSerial) === Number(cleanInput) &&
-          sheetPhone === phoneInput
-        );
-      });
+  let sheetSerial = row.Serial.toString().replace(/\D/g, "");
+  let sheetPhone = row.Phone.toString().replace(/\D/g, "");
+
+  let last5 = sheetPhone.slice(-5); // last 5 digits
+
+  return (
+    Number(sheetSerial) === Number(cleanInput) &&
+    last5 === userLast5
+  );
+});
 
       document.getElementById("slot").innerHTML = cleanInput;
       resultDiv.classList.remove("blink");
 
-      if (found) {
-        resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position;
-        launchConfetti();
-      } else {
-        resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
-      }
+if (found) {
+
+  resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position + 
+  "<br><br>📸 Take screenshot & send on WhatsApp to claim prize";
+
+  launchConfetti();
+
+  // WhatsApp number (CHANGE THIS)
+  let shopNumber = "917002747619"; 
+
+  // message
+  let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${found.Position}`;
+
+  let link = "https://wa.me/" + shopNumber + "?text=" + encodeURIComponent(msg);
+
+  document.getElementById("waLink").href = link;
+  document.getElementById("whatsappBox").style.display = "block";
+
+} else {
+  resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+  document.getElementById("whatsappBox").style.display = "none";
+}
 
     } catch (error) {
       console.error("ERROR:", error);
