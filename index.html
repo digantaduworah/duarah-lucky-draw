@@ -1,4 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duarah Store - Check Result</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background: radial-gradient(circle, #111, #000);
+  color: white;
+  text-align:center;
+}
+header {
+  padding:15px;
+  background: linear-gradient(90deg,#ffcc00,#ff6600);
+  color:black;
+}
+.box {
+  margin:30px auto;
+  padding:20px;
+  border:2px solid #00ff00;
+  border-radius:10px;
+  width:90%;
+  max-width:400px;
+}
+input, button {
+  padding:12px;
+  font-size:18px;
+  margin-top:10px;
+  border-radius:5px;
+  border:none;
+}
+button {
+  background:#00cc44;
+  color:white;
+}
+#slot {
+  font-size:40px;
+  margin:20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>🎉 DUARAH STORE 🎉</h2>
+Check Lucky Draw Result
+</header>
+
+<div class="box">
+
+<div id="slot">----</div>
+
+<input type="text" id="serial" placeholder="Enter Serial No"><br>
+<input type="text" id="phone" placeholder="Last 5 Digits"><br>
+
+<button onclick="startCheck()">Check Result</button>
+
+<div id="result"></div>
+
+<div id="whatsappBox" style="display:none;">
+  <a id="waLink" target="_blank">
+    <button style="background:#25D366;">📲 Claim on WhatsApp</button>
+  </a>
+</div>
+
+</div>
+
 <script>
+
+// ===== YOUR SCRIPT =====
 
 const dataURL = "https://opensheet.elk.sh/1BoY54pcG9Xao8wgnZtaE5HKXyr0QgOxQwsYvmTlYme0/History";
 
@@ -6,9 +79,7 @@ function randomSerial() {
   return Math.floor(1 + Math.random()*500);
 }
 
-// SLOT ANIMATION
 function spinSlot(callback) {
-
   let slot = document.getElementById("slot");
   let count = 0;
 
@@ -20,105 +91,56 @@ function spinSlot(callback) {
       clearInterval(interval);
       callback();
     }
-
   }, 50);
 }
 
-
-// MAIN FUNCTION
 async function startCheck() {
 
   let resultDiv = document.getElementById("result");
-
   let serial = document.getElementById("serial").value.trim();
   let phone = document.getElementById("phone").value;
 
   if (!serial) {
-    resultDiv.innerHTML = "⚠ Enter serial number";
+    resultDiv.innerHTML = "⚠ Enter serial";
     return;
   }
 
   resultDiv.innerHTML = "Spinning...";
-  resultDiv.classList.add("blink");
 
   spinSlot(async () => {
 
-    try {
+    let response = await fetch(dataURL);
+    let data = await response.json();
 
-      let response = await fetch(dataURL, { cache: "no-store" });
-      let data = await response.json();
+    let cleanInput = serial.replace(/\D/g, "");
+    let userLast5 = phone.replace(/\D/g, "");
 
-      let cleanInput = serial.replace(/\D/g, "");
-      let userLast5 = phone.replace(/\D/g, "");
+    let found = data.find(row => {
+      let sheetSerial = row.Serial.toString().replace(/\D/g, "");
+      let sheetPhone = row.Phone.toString().replace(/\D/g, "");
+      return sheetSerial === cleanInput && sheetPhone.slice(-5) === userLast5;
+    });
 
-      if (userLast5.length !== 5) {
-        resultDiv.innerHTML = "⚠ Enter valid last 5 digits";
-        resultDiv.classList.remove("blink");
-        return;
-      }
+    document.getElementById("slot").innerHTML = cleanInput;
 
-      let found = data.find(row => {
-        if (!row.Serial || !row.Phone) return false;
+    if (found) {
+      resultDiv.innerHTML = "🎉 YOU WON! " + found.Position;
 
-        let sheetSerial = row.Serial.toString().replace(/\D/g, "");
-        let sheetPhone = row.Phone.toString().replace(/\D/g, "");
+      let msg = `I am winner! Serial: ${cleanInput}`;
+      let link = "https://wa.me/917002747619?text=" + encodeURIComponent(msg);
 
-        let last5 = sheetPhone.slice(-5);
+      document.getElementById("waLink").href = link;
+      document.getElementById("whatsappBox").style.display = "block";
 
-        return (
-          sheetSerial === cleanInput &&
-          last5 === userLast5
-        );
-      });
-
-      document.getElementById("slot").innerHTML = cleanInput;
-      resultDiv.classList.remove("blink");
-
-      if (found) {
-        resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position +
-        "<br><br>📸 Send screenshot on WhatsApp";
-
-        launchConfetti();
-
-        let shopNumber = "917002747619";
-
-        let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${found.Position}`;
-
-        let link = "https://wa.me/" + shopNumber + "?text=" + encodeURIComponent(msg);
-
-        document.getElementById("waLink").href = link;
-        document.getElementById("whatsappBox").style.display = "block";
-
-      } else {
-        resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
-        document.getElementById("whatsappBox").style.display = "none";
-      }
-
-    } catch (error) {
-      console.error(error);
-      resultDiv.classList.remove("blink");
-      resultDiv.innerHTML = "⚠ Error loading result";
+    } else {
+      resultDiv.innerHTML = "❌ Not a winner";
+      document.getElementById("whatsappBox").style.display = "none";
     }
 
   });
 }
 
-
-// CONFETTI
-function launchConfetti() {
-
-  for (let i=0; i<30; i++) {
-
-    let div = document.createElement("div");
-    div.className = "confetti";
-    div.style.left = Math.random()*100 + "vw";
-    div.style.background = "hsl(" + Math.random()*360 + ",100%,50%)";
-    div.style.animationDuration = (2+Math.random()*2) + "s";
-
-    document.body.appendChild(div);
-
-    setTimeout(()=>div.remove(),3000);
-  }
-}
-
 </script>
+
+</body>
+</html>
