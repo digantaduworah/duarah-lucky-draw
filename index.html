@@ -11,6 +11,17 @@ body {
   background: radial-gradient(circle, #111, #000);
   color: white;
   text-align:center;
+  .blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.3; }
+}
+
+@keyframes fall {
+  to { transform: translateY(100vh) rotate(360deg); }
+}
 }
 header {
   padding:15px;
@@ -178,7 +189,25 @@ async function startCheck() {
 
   });
 }
+// CONFETTI EFFECT
+function launchConfetti() {
 
+  for (let i=0; i<30; i++) {
+
+    let div = document.createElement("div");
+    div.style.position = "fixed";
+    div.style.width = "10px";
+    div.style.height = "10px";
+    div.style.top = "0";
+    div.style.left = Math.random()*100 + "vw";
+    div.style.background = "hsl(" + Math.random()*360 + ",100%,50%)";
+    div.style.animation = "fall 3s linear";
+
+    document.body.appendChild(div);
+
+    setTimeout(()=>div.remove(),3000);
+  }
+}
 </script>
 
 </body>
