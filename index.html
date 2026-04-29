@@ -164,7 +164,7 @@ function spinSlot(callback) {
 async function startCheck() {
 
   let resultDiv = document.getElementById("result");
-  }
+  
 
   let serial = document.getElementById("serial").value.trim();
 
@@ -218,7 +218,7 @@ let found = data.find(row => {
 
 if (found) {
 
-  resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + found.Position + 
+  resultDiv.innerHTML = "🎉 YOU WON! 🎉<br>" + (found.Position || "Winner") + 
   "<br><br>📸 Take screenshot & send on WhatsApp to claim prize";
 
   launchConfetti();
