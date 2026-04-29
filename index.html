@@ -109,11 +109,6 @@ Check Lucky Draw Result
 <input type="text" id="serial" placeholder="Enter Serial No">
 <br>
 <input type="text" id="phone" placeholder="Enter Last 5 Digits">
-<br><br>
-
-<div id="recaptcha-container"></div>
-
-<button onclick="sendOTP()">Send OTP</button>
 
 <br><br>
 
@@ -278,36 +273,6 @@ function launchConfetti() {
 }
 let confirmationResult;
 
-function sendOTP() {
-
-  let phone = "+91" + document.getElementById("phone").value;
-
-  if (!window.recaptchaVerifier) {
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
-  }
-
-  firebase.auth().signInWithPhoneNumber(phone, window.recaptchaVerifier)
-    .then(result => {
-      confirmationResult = result;
-      alert("OTP Sent");
-    })
-    .catch(error => {
-      alert(error.message);
-    });
-}
-function verifyOTP() {
-
-  let code = document.getElementById("otp").value;
-
-  confirmationResult.confirm(code)
-    .then(result => {
-      alert("Verified ✅");
-      window.userVerified = true;
-    })
-    .catch(error => {
-      alert("Invalid OTP");
-    });
-}
 </script>
 
 </body>
