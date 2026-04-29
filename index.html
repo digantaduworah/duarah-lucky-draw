@@ -97,44 +97,84 @@ function spinSlot(callback) {
 async function startCheck() {
 
   let resultDiv = document.getElementById("result");
-  let serial = document.getElementById("serial").value.trim();
-  let phone = document.getElementById("phone").value;
 
-  if (!serial) {
-    resultDiv.innerHTML = "⚠ Enter serial";
+  let serial = document.getElementById("serial").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+
+  let cleanInput = serial.replace(/\D/g, "");
+  let userLast5 = phone.replace(/\D/g, "");
+
+  // ✅ VALIDATION FIRST (IMPORTANT)
+  if (!cleanInput) {
+    resultDiv.innerHTML = "⚠ Enter valid serial number";
     return;
   }
 
+  if (userLast5.length !== 5) {
+    resultDiv.innerHTML = "⚠ Enter last 5 digits of phone";
+    return;
+  }
+
+  // ✅ THEN START SPIN
   resultDiv.innerHTML = "Spinning...";
+  resultDiv.classList.add("blink");
 
   spinSlot(async () => {
 
-    let response = await fetch(dataURL);
-    let data = await response.json();
+    try {
+      let response = await fetch(dataURL, { cache: "no-store" });
+      let data = await response.json();
 
-    let cleanInput = serial.replace(/\D/g, "");
-    let userLast5 = phone.replace(/\D/g, "");
+      console.log("DATA:", data);
+      console.log("INPUT SERIAL:", cleanInput);
+      console.log("INPUT LAST5:", userLast5);
 
-    let found = data.find(row => {
-      let sheetSerial = row.Serial.toString().replace(/\D/g, "");
-      let sheetPhone = row.Phone.toString().replace(/\D/g, "");
-      return sheetSerial === cleanInput && sheetPhone.slice(-5) === userLast5;
-    });
+      let found = data.find(row => {
 
-    document.getElementById("slot").innerHTML = cleanInput;
+        if (!row.Serial || !row.Phone) return false;
 
-    if (found) {
-      resultDiv.innerHTML = "🎉 YOU WON! " + found.Position;
+        let sheetSerial = row.Serial.toString().replace(/\D/g, "");
+        let sheetPhone = row.Phone.toString().replace(/\D/g, "");
 
-      let msg = `I am winner! Serial: ${cleanInput}`;
-      let link = "https://wa.me/917002747619?text=" + encodeURIComponent(msg);
+        let last5 = sheetPhone.slice(-5);
 
-      document.getElementById("waLink").href = link;
-      document.getElementById("whatsappBox").style.display = "block";
+        console.log(sheetSerial, last5);
 
-    } else {
-      resultDiv.innerHTML = "❌ Not a winner";
-      document.getElementById("whatsappBox").style.display = "none";
+        return (
+          sheetSerial === cleanInput &&
+          last5 === userLast5
+        );
+      });
+
+      document.getElementById("slot").innerHTML = cleanInput;
+      resultDiv.classList.remove("blink");
+
+      if (found) {
+
+        resultDiv.innerHTML =
+          "🎉 YOU WON! 🎉<br>" + found.Position +
+          "<br><br>📸 Send screenshot on WhatsApp";
+
+        launchConfetti();
+
+        let shopNumber = "917002747619";
+
+        let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${found.Position}`;
+
+        let link = "https://wa.me/" + shopNumber + "?text=" + encodeURIComponent(msg);
+
+        document.getElementById("waLink").href = link;
+        document.getElementById("whatsappBox").style.display = "block";
+
+      } else {
+        resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+        document.getElementById("whatsappBox").style.display = "none";
+      }
+
+    } catch (error) {
+      console.error(error);
+      resultDiv.classList.remove("blink");
+      resultDiv.innerHTML = "⚠ Error loading result";
     }
 
   });
