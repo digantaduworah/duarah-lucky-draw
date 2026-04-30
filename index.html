@@ -148,20 +148,22 @@ async function startCheck() {
 
       console.log("DATA:", data);
 
-      let found = data.find(row => {
+let found = data.find(row => {
 
-        if (!row.Serial || !row.Phone) return false;
+  if (!row.Serial || !row.Phone) return false;
 
-        let sheetSerial = row.Serial.toString().replace(/\D/g, "");
-        let sheetPhone = row.Phone.toString().replace(/\D/g, "");
+  let sheetSerial = row.Serial.toString().trim().replace(/\D/g, "");
+  let sheetPhone = row.Phone.toString().trim().replace(/\D/g, "");
 
-        let last5 = sheetPhone.slice(-5);
+  let last5 = sheetPhone.slice(-5);
 
-        return (
-          sheetSerial === cleanInput &&
-          last5 === userLast5
-        );
-      });
+  console.log("CHECK:", sheetSerial, cleanInput, last5, userLast5);
+
+  return (
+    Number(sheetSerial) === Number(cleanInput) &&
+    last5 === userLast5
+  );
+});
 
       document.getElementById("slot").innerHTML = cleanInput;
       resultDiv.classList.remove("blink");
