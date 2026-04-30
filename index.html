@@ -150,21 +150,20 @@ async function startCheck() {
 
 let found = data.find(row => {
 
-  // 🔥 Fix column name issues
-  let serialVal = row.Serial || row["Serial"] || row[" Serial"];
-  let phoneVal = row.Phone || row["Phone"] || row[" Phone"];
+  // 🔥 CORRECT COLUMN MAPPING
+  let serialVal = row.Serial || row[Object.keys(row)[2]];   // Column C
+  let phoneVal  = row.Phone  || row[Object.keys(row)[3]];   // Column D
+  let position  = row.Position || row[Object.keys(row)[1]]; // Column B
 
   if (!serialVal || !phoneVal) return false;
 
   let sheetSerial = serialVal.toString().trim().replace(/\D/g, "");
-  let sheetPhone = phoneVal.toString().trim().replace(/\D/g, "");
+  let sheetPhone  = phoneVal.toString().trim().replace(/\D/g, "");
 
   let last5 = sheetPhone.slice(-5);
 
-  console.log("CHECK:", sheetSerial, cleanInput, last5, userLast5);
-
   return (
-    Number(sheetSerial) === Number(cleanInput) &&
+    sheetSerial === cleanInput &&
     last5 === userLast5
   );
 });
@@ -173,10 +172,10 @@ let found = data.find(row => {
       resultDiv.classList.remove("blink");
 
       if (found) {
-
+let prize = found.Position || found[Object.keys(found)[1]];
         resultDiv.innerHTML =
-          "🎉 YOU WON! 🎉<br>" + found.Position +
-          "<br><br>📸 Send screenshot on WhatsApp";
+  "🎉 YOU WON! 🎉<br>" + prize +
+  "<br><br>📸 Send screenshot on WhatsApp";
 
         launchConfetti();
 
