@@ -150,10 +150,14 @@ async function startCheck() {
 
 let found = data.find(row => {
 
-  if (!row.Serial || !row.Phone) return false;
+  // 🔥 Fix column name issues
+  let serialVal = row.Serial || row["Serial"] || row[" Serial"];
+  let phoneVal = row.Phone || row["Phone"] || row[" Phone"];
 
-  let sheetSerial = row.Serial.toString().trim().replace(/\D/g, "");
-  let sheetPhone = row.Phone.toString().trim().replace(/\D/g, "");
+  if (!serialVal || !phoneVal) return false;
+
+  let sheetSerial = serialVal.toString().trim().replace(/\D/g, "");
+  let sheetPhone = phoneVal.toString().trim().replace(/\D/g, "");
 
   let last5 = sheetPhone.slice(-5);
 
