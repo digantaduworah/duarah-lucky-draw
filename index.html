@@ -150,55 +150,70 @@ async function startCheck() {
 
 let found = data.find(row => {
 
-  // Get all values safely
-  let values = Object.values(row);
+  let serialVal = "";
+  let phoneVal = "";
+  let prizeVal = "";
 
-  // Expected format:
-  // [Timestamp, Winner #, Serial, Phone]
-  let position  = values[1]?.toString().trim();
-  let serialVal = values[2]?.toString().trim();
-  let phoneVal  = values[3]?.toString().trim();
+  // 🔍 Auto-detect correct fields
+  Object.values(row).forEach(val => {
+
+    if (!val) return;
+
+    let v = val.toString().trim();
+
+    // Detect phone (10 digits)
+    if (/^\d{10}$/.test(v)) {
+      phoneVal = v;
+    }
+
+    // Detect serial (1–3 digit number)
+    else if (/^\d{1,3}$/.test(v)) {
+      serialVal = v;
+    }
+
+    // Detect prize
+    else if (v.toLowerCase().includes("winner")) {
+      prizeVal = v;
+    }
+
+  });
 
   if (!serialVal || !phoneVal) return false;
 
-  // Normalize numbers
-  let sheetSerial = serialVal.replace(/\D/g, "");
-  let sheetPhone  = phoneVal.replace(/\D/g, "");
+  let last5 = phoneVal.slice(-5);
 
-  let last5 = sheetPhone.slice(-5);
-
-  console.log("CHECK:", sheetSerial, cleanInput, last5, userLast5);
+  console.log("CHECK:", serialVal, cleanInput, last5, userLast5);
 
   return (
-    Number(sheetSerial) === Number(cleanInput) &&
+    Number(serialVal) === Number(cleanInput) &&
     last5 === userLast5
   );
 });
       document.getElementById("slot").innerHTML = cleanInput;
       resultDiv.classList.remove("blink");
 
-      if (found) {
-let values = Object.values(found);
-let prize = values[1]; // Winner #1, #2 etc
-        resultDiv.innerHTML =
-  "🎉 YOU WON! 🎉<br>" + prize +
-  "<br><br>📸 Send screenshot on WhatsApp";
+     if (found) {
 
-        launchConfetti();
+  let prize = Object.values(found).find(v =>
+    v && v.toString().toLowerCase().includes("winner")
+  );
 
-        let shopNumber = "917002747619";
+  resultDiv.innerHTML =
+    "🎉 YOU WON! 🎉<br>" + prize +
+    "<br><br>📸 Send screenshot on WhatsApp";
 
-        let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${prize}`;
+  let shopNumber = "917002747619";
 
-        let link = "https://wa.me/" + shopNumber + "?text=" + encodeURIComponent(msg);
+  let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${prize}`;
 
-        document.getElementById("waLink").href = link;
-        document.getElementById("whatsappBox").style.display = "block";
+  let link = "https://wa.me/" + shopNumber + "?text=" + encodeURIComponent(msg);
 
-      } else {
-        resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
-        document.getElementById("whatsappBox").style.display = "none";
-      }
+  document.getElementById("waLink").href = link;
+  document.getElementById("whatsappBox").style.display = "block";
+
+} else {
+  resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+}
 
     } catch (error) {
       console.error(error);
