@@ -11,23 +11,16 @@ body {
   background: radial-gradient(circle, #111, #000);
   color: white;
   text-align:center;
-  .blink {
-  animation: blink 1s infinite;
 }
 
-@keyframes blink {
-  50% { opacity: 0.3; }
-}
-
-@keyframes fall {
-  to { transform: translateY(100vh) rotate(360deg); }
-}
-}
+/* HEADER */
 header {
   padding:15px;
   background: linear-gradient(90deg,#ffcc00,#ff6600);
   color:black;
 }
+
+/* BOX */
 .box {
   margin:30px auto;
   padding:20px;
@@ -36,6 +29,8 @@ header {
   width:90%;
   max-width:400px;
 }
+
+/* INPUT + BUTTON */
 input, button {
   padding:12px;
   font-size:18px;
@@ -43,13 +38,30 @@ input, button {
   border-radius:5px;
   border:none;
 }
+
 button {
   background:#00cc44;
   color:white;
 }
+
+/* SLOT */
 #slot {
   font-size:40px;
   margin:20px;
+}
+
+/* BLINK */
+.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.3; }
+}
+
+/* CONFETTI FALL */
+@keyframes fall {
+  to { transform: translateY(100vh) rotate(360deg); }
 }
 </style>
 </head>
@@ -67,6 +79,7 @@ Check Lucky Draw Result
 
 <input type="text" id="serial" placeholder="Enter Serial No"><br>
 <input type="text" id="phone" maxlength="5" placeholder="Enter Last 5 Digits">
+
 <button onclick="startCheck()">Check Result</button>
 
 <div id="result"></div>
@@ -80,8 +93,6 @@ Check Lucky Draw Result
 </div>
 
 <script>
-
-// ===== YOUR SCRIPT =====
 
 const dataURL = "https://opensheet.elk.sh/1BoY54pcG9Xao8wgnZtaE5HKXyr0QgOxQwsYvmTlYme0/History";
 
@@ -114,7 +125,7 @@ async function startCheck() {
   let cleanInput = serial.replace(/\D/g, "");
   let userLast5 = phone.replace(/\D/g, "");
 
-  // ✅ VALIDATION FIRST (IMPORTANT)
+  // ✅ VALIDATION FIRST
   if (!cleanInput) {
     resultDiv.innerHTML = "⚠ Enter valid serial number";
     return;
@@ -125,7 +136,7 @@ async function startCheck() {
     return;
   }
 
-  // ✅ THEN START SPIN
+  // SPIN
   resultDiv.innerHTML = "Spinning...";
   resultDiv.classList.add("blink");
 
@@ -134,10 +145,8 @@ async function startCheck() {
     try {
       let response = await fetch(dataURL, { cache: "no-store" });
       let data = await response.json();
-console.log("FULL DATA:", data);
+
       console.log("DATA:", data);
-      console.log("INPUT SERIAL:", cleanInput);
-      console.log("INPUT LAST5:", userLast5);
 
       let found = data.find(row => {
 
@@ -147,8 +156,6 @@ console.log("FULL DATA:", data);
         let sheetPhone = row.Phone.toString().replace(/\D/g, "");
 
         let last5 = sheetPhone.slice(-5);
-
-        console.log(sheetSerial, last5);
 
         return (
           sheetSerial === cleanInput &&
@@ -189,7 +196,8 @@ console.log("FULL DATA:", data);
 
   });
 }
-// CONFETTI EFFECT
+
+// CONFETTI
 function launchConfetti() {
 
   for (let i=0; i<30; i++) {
