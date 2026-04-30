@@ -150,32 +150,36 @@ async function startCheck() {
 
 let found = data.find(row => {
 
+  // Get all values safely
   let values = Object.values(row);
 
-  let position   = values[1]; // Winner #
-  let serialVal  = values[2]; // Serial
-  let phoneVal   = values[3]; // Phone
+  // Expected format:
+  // [Timestamp, Winner #, Serial, Phone]
+  let position  = values[1]?.toString().trim();
+  let serialVal = values[2]?.toString().trim();
+  let phoneVal  = values[3]?.toString().trim();
 
   if (!serialVal || !phoneVal) return false;
 
-  let sheetSerial = serialVal.toString().trim();
-  let sheetPhone  = phoneVal.toString().trim();
+  // Normalize numbers
+  let sheetSerial = serialVal.replace(/\D/g, "");
+  let sheetPhone  = phoneVal.replace(/\D/g, "");
 
   let last5 = sheetPhone.slice(-5);
 
   console.log("CHECK:", sheetSerial, cleanInput, last5, userLast5);
 
   return (
-    sheetSerial === cleanInput &&
+    Number(sheetSerial) === Number(cleanInput) &&
     last5 === userLast5
   );
 });
-
       document.getElementById("slot").innerHTML = cleanInput;
       resultDiv.classList.remove("blink");
 
       if (found) {
-let prize = found.Position || found[Object.keys(found)[1]];
+let values = Object.values(found);
+let prize = values[1]; // Winner #1, #2 etc
         resultDiv.innerHTML =
   "🎉 YOU WON! 🎉<br>" + prize +
   "<br><br>📸 Send screenshot on WhatsApp";
@@ -184,7 +188,7 @@ let prize = found.Position || found[Object.keys(found)[1]];
 
         let shopNumber = "917002747619";
 
-        let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${found.Position}`;
+        let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${prize}`;
 
         let link = "https://wa.me/" + shopNumber + "?text=" + encodeURIComponent(msg);
 
