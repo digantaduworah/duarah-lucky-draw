@@ -150,17 +150,20 @@ async function startCheck() {
 
 let found = data.find(row => {
 
-  // 🔥 CORRECT COLUMN MAPPING
-  let serialVal = row.Serial || row[Object.keys(row)[2]];   // Column C
-  let phoneVal  = row.Phone  || row[Object.keys(row)[3]];   // Column D
-  let position  = row.Position || row[Object.keys(row)[1]]; // Column B
+  let values = Object.values(row);
+
+  let position   = values[1]; // Winner #
+  let serialVal  = values[2]; // Serial
+  let phoneVal   = values[3]; // Phone
 
   if (!serialVal || !phoneVal) return false;
 
-  let sheetSerial = serialVal.toString().trim().replace(/\D/g, "");
-  let sheetPhone  = phoneVal.toString().trim().replace(/\D/g, "");
+  let sheetSerial = serialVal.toString().trim();
+  let sheetPhone  = phoneVal.toString().trim();
 
   let last5 = sheetPhone.slice(-5);
+
+  console.log("CHECK:", sheetSerial, cleanInput, last5, userLast5);
 
   return (
     sheetSerial === cleanInput &&
