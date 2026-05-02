@@ -193,18 +193,30 @@ let found = data.find(row => {
       resultDiv.classList.remove("blink");
 
      if (found) {
+// 🔒 LOCK INPUTS
+document.getElementById("serial").disabled = true;
+document.getElementById("phone").disabled = true;
 
+// 🔒 LOCK BUTTON
+document.querySelector("button").disabled = true;
+
+// 🔒 OPTIONAL: CHANGE STYLE (greyed out)
+document.getElementById("serial").style.opacity = "0.6";
+document.getElementById("phone").style.opacity = "0.6";
   let prize = Object.values(found).find(v =>
     v && v.toString().toLowerCase().includes("winner")
   );
-
-  resultDiv.innerHTML =
-    "🎉 YOU WON! 🎉<br>" + prize +
-    "<br><br>📸 Send screenshot on WhatsApp";
+       let verifyCode = Math.floor(100000 +
+      Math.random()*900000);
+       
+resultDiv.innerHTML =
+  "🎉 YOU WON! 🎉<br>" + prize +
+  "<br><br>✅ VERIFIED RESULT" +
+  "<br><br>📸 Send screenshot on WhatsApp";
 
   let shopNumber = "917002747619";
 
-  let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${prize}`;
+  let msg = `Hello Duarah Store, I am a winner!\nSerial: ${cleanInput}\nPrize: ${prize}\nCode: ${verifyCode}`;
 
   let link = "https://wa.me/" + shopNumber + "?text=" + encodeURIComponent(msg);
 
@@ -212,7 +224,7 @@ let found = data.find(row => {
   document.getElementById("whatsappBox").style.display = "block";
 
 } else {
-  resultDiv.innerHTML = "❌ Not a winner<br>Try again!";
+  resultDiv.innerHTML = "❌ Not a winner<br>Better Luck Next Time!";
 }
 
     } catch (error) {
